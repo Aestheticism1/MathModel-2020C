@@ -133,6 +133,18 @@ def test_batch(model, criterion, optimizer, batch):
         return prediction, pred_sort, y_sort, correct_num, is_correct
 
 
+def lr_schedule(optimizer, fold, init_lr):
+    lr_anneal = 'pwc'
+    if lr_anneal == 'const':
+        pass
+    elif lr_anneal == 'pwc':
+        for param_group in optimizer.param_groups:
+            if fold == 5:
+                param_group['lr'] = init_lr*0.1
+            elif fold == 8:
+                param_group['lr'] = init_lr*0.01
+
+
 def train(train_data, test_data):
     print(f"learning rate: {learning_rate}, weight decay: {weight_decay}, batch size: {batch_size}")
     # data_size = len(data)
@@ -176,9 +188,9 @@ def train(train_data, test_data):
         train_data_curr_fold = np.concatenate((train_data_curr_fold_head, train_data_curr_fold_tail))
 
         # epoch
-        model = model.train()
         for curr_epoch in range(epoch):
 
+            model = model.train()
             # train minibatch
             train_pred = []
             train_data_curr_fold = train_data_curr_fold[np.random.permutation(len(train_data_curr_fold))]
@@ -193,6 +205,7 @@ def train(train_data, test_data):
             train_pred = np.concatenate(train_pred, axis=0)
 
             val_pred = []
+            model = model.eval()
             for b in minibatch(val_data_curr_fold, batch_size):
                 val_batch_pred = val_batch(model, criterion, optimizer, b)
                 val_pred.append(val_batch_pred)
@@ -213,8 +226,11 @@ def train(train_data, test_data):
                 collect_val_acc.append(val_acc)
 
         # learning rate decay
-        for param_group in optimizer.param_groups:
-            param_group['lr'] *= 0.9
+        # for param_group in optimizer.param_groups:
+        #     param_group['lr'] *= 0.9
+
+        # learning rate decay
+        lr_schedule(optimizer, i, learning_rate)
 
         # test acc
         model = model.eval()
@@ -317,7 +333,7 @@ if __name__ == '__main__':
 
         with open(join(data_path, f"s{subject_num}_train2.pkl"), "rb") as file:
             temp = pickle.load(file)['data']
-            data_train = np.vstack((data_train, temp))
+            data_train = np.vstack((data_train, temp[:-120]))
             data_val = np.vstack((data_val, temp[-120:]))
 
         train(data_train, data_val)

@@ -163,7 +163,7 @@ def std(signals, event):
     for i in range(part.shape[1]):
         max = np.max(part[:, i])
         min = np.min(part[:, i])
-        part[:, i] = (part[:, i] - min) / (max - min) * 256 + 1
+        part[:, i] = (part[:, i] - min) / (max - min)
 
     signals[start: end] = part
 
@@ -275,8 +275,8 @@ def butter_filter(raw_data, lowcut=25, fs=250):
 
 
 if __name__ == '__main__':
-    for i in range(2, 6):
-        read_train_data(subject=i, is_average=False, is_save=True, part2=True)
+    for i in range(1, 6):
+        read_train_data(subject=i, is_average=False, is_save=True, part2=False)
     # read_test_data(subject=1, is_average=False, is_save=True)
 
     # xx, yy = read_pkl(save_path)
