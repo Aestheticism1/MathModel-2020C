@@ -423,6 +423,10 @@ if __name__ == '__main__':
     args = parse_args()
     subject_num = args.subject
 
+    pictures_dir = './results/pictures'
+    if not os.path.exists(pictures_dir):
+        os.makedirs(pictures_dir)
+
     # data format: [(x, y, y_stimulate)]
     is_with_average = '' if args.is_with_average else 'o'
     train_or_test = 'train' if args.is_train == 1 else 'test'
