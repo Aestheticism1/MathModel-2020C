@@ -274,8 +274,10 @@ def butter_filter(raw_data, lowcut=25, fs=250):
 if __name__ == '__main__':
     for i in range(1, 6):
         read_train_data(subject=i, is_average=False, is_save=True, part2=False)
-    # for i in range(1, 6):
-    #     read_test_data(subject=i, is_average=False, is_save=True)
+    for i in range(1, 6):
+        read_train_data(subject=i, is_average=False, is_save=True, part2=True)
+    for i in range(1, 6):
+        read_test_data(subject=i, is_average=False, is_save=True)
 
     # save_path = './data/s%d_train_wo.pkl' % 1
     # xx, yy = read_pkl(save_path)

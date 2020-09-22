@@ -3,10 +3,10 @@ Author: Zhen Dong
 Time  : 2020-09-18 10:27
 """
 
-import sys
 import pickle
 import torch
 import torch.nn as nn
+import argparse
 import numpy as np
 import os
 from os.path import join
@@ -14,9 +14,6 @@ import matplotlib.pyplot as plt
 from model2 import ConvNet
 
 # super parameters
-subject_num = int(sys.argv[1])
-is_train = int(sys.argv[2])  # 1 train; 2 test
-is_with_ave = sys.argv[3]  # w; o
 test_size = 12
 data_path = "./data"
 batch_size = 128
@@ -411,16 +408,29 @@ def test(test_data, ckpt_path, subject):
             pred_values = []
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Train or test prepared P300 data')
+
+    parser.add_argument('--subject', required=True, help='which subject', type=int)
+    parser.add_argument('--is_train', help='train or test', default=1, type=int)
+    parser.add_argument('--is_with_average', help='with or without average', default=False, type=bool)
+
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
 
-    # data format: [(x, y, y_stimulate)]
-    is_with_average = '' if is_with_ave == 'w' else 'o'
-    train_or_test = 'train' if is_train == 1 else 'test'
+    args = parse_args()
+    subject_num = args.subject
 
-    if is_train == 1:
+    # data format: [(x, y, y_stimulate)]
+    is_with_average = '' if args.is_with_average else 'o'
+    train_or_test = 'train' if args.is_train == 1 else 'test'
+
+    if args.is_train == 1:
         data_train = np.zeros((0, 3), dtype=float)
         data_val = np.zeros((0, 3), dtype=float)
-        # for i in range():
+
         print("开始训练被试%d..." % subject_num)
         with open(join(data_path, f"s{subject_num}_{train_or_test}_w{is_with_average}.pkl"), "rb") as infile:
             temp = pickle.load(infile)['data']
