@@ -9,7 +9,6 @@ import os
 from six.moves import cPickle as pickle
 from scipy import signal
 import matplotlib.pyplot as plt
-from mne.decoding import CSP
 
 CHAR = ['01(B)', '02(D)', '03(G)', '04(L)', '05(O)', '06(Q)',
         '07(S)', '08(V)', '09(Z)', '10(4)', '11(7)', '12(9)']
@@ -101,7 +100,7 @@ def read_train_data(subject, is_average=True, is_save=False, part2=False):
         char_i = butter_filter(char_i)
 
         # 标准化
-        char_i = std(char_i, event_i)
+        # char_i = std(char_i, event_i)
 
         # 是否分段平均
         if is_average:
@@ -170,10 +169,10 @@ def std(signals, event):
     return signals
 
 
-def read_test_data(subject, is_average=True, is_save=False):
+def read_test_data(subject, is_average=False, is_save=False):
     data_path = r'./P300/S%d/S%d_test_data.xlsx' % (subject, subject)
     event_path = r'./P300/S%d/S%d_test_event.xlsx' % (subject, subject)
-    all_chars = []
+    all_chars = np.zeros((0, 3), dtype=float)
     num = 10 if subject not in [2, 3] else 9
 
     for i in range(num):
@@ -200,17 +199,15 @@ def read_test_data(subject, is_average=True, is_save=False):
         # ICA or CSP (待完成)
         # char_i = common_spatial_pattern(char_i, event_i, char_row_col)
 
-        all_chars.append(res)
-        print(np.array(all_chars).shape)
-
-    all_chars = np.array(all_chars)
+        all_chars = np.vstack((all_chars, res))
+        print(all_chars.shape)
 
     if is_save:
         save_dir = './data'
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
-        file_name = 's%d_test_%s.pkl' % (subject, 'w' if is_average else 'wo')
+        file_name = 's%d_test.pkl' % subject
         save_path = os.path.join(save_dir, file_name)
         print("保存data和labels到%s..." % save_path)
         print("shape of data:", all_chars.shape)
@@ -226,7 +223,7 @@ def common_spatial_pattern(raw_data, event, pos):
 
 
 def plot_data_2(signal, signal2, channel):
-    x = np.linspace(0, SCOPE-1, num=SCOPE) / 250
+    x = np.linspace(0, SCOPE-1-OFFSET, num=SCOPE) / 250
     y1 = signal[:, channel-1]
     y2 = signal2[:, channel-1]
     minimum = np.min(y1) if np.min(y1) <= np.min(y2) else np.min(y2)
@@ -238,7 +235,7 @@ def plot_data_2(signal, signal2, channel):
 
 
 def plot_data(signal, channel):
-    x = np.linspace(0, SCOPE-1, num=SCOPE) / 250
+    x = np.linspace(0, SCOPE-1-OFFSET, num=SCOPE-OFFSET) / 250
     y = signal[:, channel-1]
     plt.axis([x[0], x[len(x)-1], np.min(y) - 10, np.max(y) + 10])
     plt.plot(x, y, 'g')
@@ -277,18 +274,11 @@ def butter_filter(raw_data, lowcut=25, fs=250):
 if __name__ == '__main__':
     for i in range(1, 6):
         read_train_data(subject=i, is_average=False, is_save=True, part2=False)
-    # read_test_data(subject=1, is_average=False, is_save=True)
+    # for i in range(1, 6):
+    #     read_test_data(subject=i, is_average=False, is_save=True)
 
+    # save_path = './data/s%d_train_wo.pkl' % 1
     # xx, yy = read_pkl(save_path)
-
-    # print("被试1，行列1，通道5，字符B和L，B为绿色有P300，L为橙色无P300")
-    # a1 = xx[0, 0:150, :]
-    # a2 = xx[3, 0:150, :]
-    # b1 = x[0, 0:150, :]
-    # b2 = x[3, 0:150, :]
-    # plot_data_2(a1, a2, 7)
-    # plot_data_2(b1, b2, 7)
-    # plot_data(a1, 7)
-    # plot_data(b1, 7)
-    # plot_data(a2, 7)
-    # plot_data(b2, 7)
+    # a1 = xx[3, 0]
+    # for i in range(20):
+    #     plot_data(a1, i+1)
