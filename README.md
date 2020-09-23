@@ -21,5 +21,5 @@ python train_subject.py --subject 1 --is_train 0
 
 #### if you have a GPU
 ```
-CUDA_VISIBLE_DEVICES=0 python train_subject.py
+CUDA_VISIBLE_DEVICES=0 python train_subject.py --subject 1
 ```
